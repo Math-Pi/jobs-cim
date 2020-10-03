@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.CompanyDao">
+    <!--SQL片段  -->
+    <sql id="selectCompanyListWhere">
+        <where>
+	       <if test="com_name != null" >
+	           com_name like "%"#{com_name}"%"
+	       </if>
+	       <if test="com_source != null" >
+	        and com_source = #{com_source}
+	       </if>
+	       <if test="com_industry != null" >
+	        and com_industry = #{com_industry}
+	       </if>
+	       <if test="com_people != null" >
+	        and com_people = #{com_people}
+	       </if>
+	       <if test="com_money != null" >
+	        and com_money = #{com_money}
+	       </if>
+        </where>
+    </sql>
+	<!-- 查询公司招聘列表  -->
+	<select id="selectCompanyList" parameterType="company" 
+                                           resultType="company">
+		SELECT
+			com_id,
+			com_name,
+			com_principal,
+			b.dict_item_name com_source,
+			c.dict_item_name com_industry,
+			d.dict_item_name com_money,
+			e.dict_item_name com_people,
+			com_source,
+			com_people,
+			com_education,
+			com_address
+		FROM
+			company  a
+		LEFT JOIN (
+			SELECT
+				dict_id,
+				dict_item_name
+			FROM
+				base_dict
+			WHERE
+				dict_type_code = '002'
+		) b ON a.com_source = b.dict_id
+		LEFT JOIN (
+			SELECT
+				dict_id,
+				dict_item_name
+			FROM
+				base_dict
+			WHERE
+				dict_type_code = '011'
+		) c ON a.com_industry = c.dict_id
+		LEFT JOIN (
+			SELECT
+				dict_id,
+				dict_item_name
+			FROM
+				base_dict
+			WHERE
+				dict_type_code = '010'
+		) d ON a.com_money = d.dict_id
+		LEFT JOIN (
+			SELECT
+				dict_id,
+				dict_item_name
+			FROM
+				base_dict
+			WHERE
+				dict_type_code = '005'
+		) e ON a.com_people = e.dict_id
+		<include refid="selectCompanyListWhere"/>
+		<!-- 执行分页查询 -->
+		<if test="start !=null and rows != null">
+			limit #{start},#{rows}
+		</if>
+	</select>
+	<!-- 查询公司招聘总数 -->
+	<select id="selectCompanyListCount" parameterType="company" 
+                                                 resultType="Integer">
+		select count(*) from company
+		<include refid="selectCompanyListWhere"/>
+	</select>	
+	
+	<!-- 添加公司招聘 -->
+	<insert id="createCompany" parameterType="company">
+	    insert into Company(
+						com_name,
+						com_principal,
+						com_source,
+						com_industry,
+						com_people,
+						com_money,
+						com_education,
+						com_address
+	             )
+	             values(#{com_name},
+	                    #{com_principal},
+	                    #{com_source},
+	                    #{com_industry},
+	                    #{com_people},
+	                    #{com_money},
+	                    #{com_education},
+	                    #{com_address}
+	            )
+	</insert>
+	<!-- 根据id查询公司招聘信息 -->
+	<select id="getCompanyById" parameterType="Integer" 
+	resultType="company">
+	    select * from Company where com_id = #{id}
+	</select>
+	<!-- 更新公司招聘信息 -->
+	<update id="updateCompany" parameterType="company">
+	    update company
+	    <set>
+	        <if test="com_name!=null">
+	            com_name=#{com_name},
+	        </if>
+	        <if test="com_principal!=null">
+	            com_principal=#{com_principal},
+	        </if>
+	        <if test="com_source!=null">
+	            com_source=#{com_source},
+	        </if>
+	        <if test="com_industry!=null">
+	            com_industry=#{com_industry},
+	        </if>
+	        <if test="com_people!=null">
+	            com_people=#{com_people},
+	        </if>
+	        <if test="com_money!=null">
+	            com_money=#{com_money},
+	        </if>
+	        <if test="com_education!=null">
+	            com_education=#{com_education},
+	        </if>
+	        <if test="com_address!=null">
+	            com_address=#{com_address},
+	        </if>
+	    </set>
+	    where com_id=#{com_id}
+	</update>
+	<!-- 删除公司招聘 -->
+	<delete id="deleteCompany" parameterType="Integer">
+	    delete from Company where com_id=#{id}
+	</delete>
+</mapper>
